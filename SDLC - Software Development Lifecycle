@@ -1,0 +1,30 @@
+Fundamentals – Product Management
+by Todd Bagley
+CONCEPTUALIZE – Capture an idea into a formalized concept. 
+RESEARCH – Identify and prioritize business and customer experience goals.
+DESIGN – Define the customer experience in terms of user experience and user interface.
+BUILD – Architect systems and develop software to (1) implement the design and (2) facilitate scaling.
+TEST – First test for functionality, then for user adoption and acceptance.
+LAUNCH – Invite target markets to use the application.
+INSPECT – Are users adopting? Are users accepting? What benefits are compelling acceptance? What is the economic value of those benefits? Are decision makers aware of (1) the economic value they are benefitting from, and (2) the brand responsible for delivering the value?
+SDLC – software development lifecycle:
+•	Plan
+o	Stakeholder Brainstorming and Market Survey
+o	Business and Customer Experience Goals
+o	Requirements, Specifications and Network Architecture 
+o	Economic and Financial Analysis
+o	UX/UI Design: Wireframe and Prototype
+•	Build
+o	SysAd – build the environments (DEV, QA, PROD)
+o	DevOps – code the software
+o	Database – warehouse the data
+•	Test
+o	Defect (aka. Bug) tracking
+o	Unit, Integration, System and Acceptance
+•	Deploy
+o	User Adoption
+o	User Acceptance
+o	Value Awareness
+AGILE – set of principles for rapid application development: adaptive planning, evolutionary development, early delivery and continuous improvement. Rapid,  flexible response to change. 
+SCRUM – framework for managing work: three to nine developers break up work into sprints, track progress and re-plan in daily stand-up meetings called “daily scrums”. 
+KANBAN – method for managing work: work items are visualized via a Kanban board and pulled as capacity permits (rather than being pushed).

@@ -1,0 +1,258 @@
+Fundamentals – NodeJS & Express
+by Todd Bagley
+NODE.JS – Wrapper for V8 JavaScript Runtime, providing functionality for scalable network applications using JavaScript on the server-side.
+APPLICATIONS – things you can build with NodeJS
+Websocket server – like a chat server
+Fast File Upload Client – receive files and preprocess while data is arriving
+Ad Server
+Real-Time Data Apps
+WHAT NODE.JS IS NOT – it is low level
+Not a framework – doesn’t replace Django or Rails, etc.
+Not for Beginners – it’s very low level, written in C
+Not multi-threaded – it’s single-threaded, non-blocking => supports callbacks
+HELLO WORLD – hello.js
+var http = require(‘http’);
+
+http.createServer(function(req, res) {
+	res.writeHead(200);
+	res.write(“hello world”);
+	res.end();
+}).listen(8080);
+
+console.log(‘Listening on port 8080…’);
+
+ALTERNATE SYNTAX – hello.js
+var http = require(‘http’);
+var server = http.createServer();
+server.on(‘request’, function(req, res) {
+	res.writeHead(200);
+	res.write(“hello world”);
+	res.end();
+}).listen(8080);
+
+console.log(‘Listening on port 8080…’);
+
+EVENT LOOP – first NodeJS registers events, then it continuously looks for those events, dropping work into the event queue.
+ 
+WHY JAVASCRIPT? – Ryan Dahl
+“JavaScript has certain characteristics that make it very different than other dynamic languages, namely that it has no concept of threads. Its model of concurrency is completely based around events.”
+
+EVENT EMITTERS – for custom event emitters
+var EventEmitter = require(‘events’).EventEmitter;
+
+var logger = new EventEmitter();
+
+logger.on(‘error’, function(msg) {
+	console.log(‘ERR: ’ + msg);
+});
+
+logger.emit(‘error’, ‘[message goes here]’);
+
+STREAMS – opportunity for data chunk processing
+Readable, Writeable, Readable+Writeable
+notes for Node version v0.10.x aka. "streams2”
+server.on(‘request’, function([readable], [writeable]) {
+	[writeable].writeHead(200);
+	[readable].on(‘end’, function(){
+[writeable].write(“hello”);
+		setTimeout(function(){
+			[writeable].write(“world”);
+			[writeable].end();
+}, 5000);
+});
+}).listen(8080);
+--- EXAMPLE 1 ---------------------------------------------------
+server.on(‘request’, function([readable], [writeable]) {
+	[writeable].writeHead(200);
+	[readable].on(‘readable’, function(){
+	var chunk = null;
+	while (null != (chunk = [readable].read())) {
+		[writeable].write(chunk);
+} 
+});
+	[writeable].end();
+}).listen(8080);
+--- OR ---
+server.on(‘request’, function([readable], [writeable]) {
+	[writeable].writeHead(200);
+	[readable].pipe([writeable]);
+}).listen(8080);
+
+--- EXAMPLE 2 ---------------------------------------------------
+var fs = require(‘fs’);
+
+var file = fs.createReadStream(“readme.md”);
+var newFile = fs.crateWriteStream(“readme_copy.md”);
+
+file.pipe(newFile);
+
+--- EXAMPLE 3 ---------------------------------------------------
+http.createServer(function(request, response) {
+var newFile = fs.createWriteStream(“readme_copy.md”);
+	var fileBytes = request.headers[‘content-length’];
+	var uploadedBytes = 0;
+	
+	request.on(‘readable’, function() {
+		var chunk = null;
+		while (null != (chunk = [readable].read())) {
+		uploadedBytes += chunk.length;
+		var progress = (uploadedBytes / fileBytes) * 100;
+		response.write(“progress: ” + parseInt(progress, 10) + “%\n”);
+} 
+});
+request.pipe(newFile);
+}).listen(8080);
+
+MODULES – example on how to write code and make it public
+custom_hello.js 
+var hello = function(){
+	console.log(“hello”);
+}
+module.exports = hello;
+
+custom_goodbye.js 
+exports.goodbye = function(){
+	console.log(“goodbye”);
+}
+
+app.js 
+var hello = require(‘./custom_hello’);
+var gb = require(‘./custom_goodbye’);
+hello();
+gb.goodbye();
+--- or ---
+var hello = require(‘./custom_hello’);
+hello();
+require(‘./custom_goodbye’).goodbye();
+
+SEMANTIC VERSIONING – controlling “npm install” automation
+“[dependency package name here]” : “[version number here]”
+
+“[dependency package name here]” : “[major].[minor].[patch]”
+
+“[dependency package name here]” : “1.8.7”
+
+
+“[dependency package name here]” : “~1.8.7” ( >=1.8.7, <2.0.0 ) 
+
+“[dependency package name here]” : “~1.8” ( >=1.8.0, <2.0.0 ) 
+
+“[dependency package name here]” : “~1” ( >=1.0.0, <2.0.0 ) 
+
+EXPRESS – Sinatra-inspired web development framework for NodeJS
+Easy route URLs to callbacks
+Middleware (from Connect)
+Environment based configuration
+Redirection helpers
+File uploads
+
+npm install –-save express	// installs the module 
+// AND adds to package.json
+var express = require(‘express’);
+var app = express();
+app.get(‘/’, function( req, res ) {
+	res.sendFile(__dirname + “/index.html”);
+});
+app.listen(8080);
+
+--- Twitter Example --------------------------------
+var request = require(‘request’);
+var url = require(‘url’);
+app.get(‘/tweets/:username’, function(req, res) {
+	var username = req.params.username;
+	options = {
+		protocol: “http:”,
+		host: ‘api.twitter.com’,
+pathname: ‘/1/statuses/user_timeline.json’,
+query: { screen_name: username, count: 10}
+	}
+	var twitterUrl = url.format(options);
+	request(twitterUrl).pipe(res);
+});
+
+
+--- PrettyJSON Example --------------------------------
+npm install prettyjson -g
+node app.js
+$ [command] | prettyjson
+
+--- Templating Library --------------------------------
+npm install –-save ejs // embedded javascript
+				 // default path = [app]/views
+app.js 
+app.get(‘/tweets/:username’, function(req, res) {
+	…
+	request(url, function(err, res, body){
+	var tweets = JSON.parse(body);
+	response.locals = { tweets: tweets, name: username };
+	response.render(‘tweets.ejs’);
+});
+});
+
+tweets.ejs 
+<h1>Tweets for @<%= name %></h1>
+<ul>
+	<% tweets.forEach(function(tweet){ %>
+		<li><%= tweet.text %></li>
+	<% }); %>
+</ul>
+
+SOCKET.IO – duplexed websocket connection
+npm install –-save socket.io
+
+--- example – server-side ---
+var express = require(‘express’);
+var app = express();
+var server = require(‘http’).createServer(app);
+var io = require(‘socket.io’)(server);
+io.on(‘connection’), function(client){
+	console.log(‘Client connected…’);
+	client.emit(‘messges’, { hello: ‘world’ });
+});
+app.get(‘/’, function(req, res) {
+	res.sendFile(__dirname + ‘index.html’);
+});
+server.listen(8080);
+
+--- example – client-side ---
+<script src=”/socket.io/socket.io.js”></script>
+<script>
+	var socket = io.connect(‘http://localhost:8080’);
+</script>
+EXPRESS – routes file example
+var express = require(‘express’);
+var router = express.Router();
+var bodyParser = require(‘body-parser’);
+var parseUrlencoded = bodyParser.urlencoded({ extended: false });
+
+var blocks = {}
+
+router.route(‘/’)
+	.get(function(request, response) {}
+	.post(parseUrlencoded, function(request, response) {}
+
+router.route(‘/:name’)
+	.all(function(request, response) {}
+	.get(function(request, response) {}
+	.delete(function(request, response) {}
+
+module.exports = router;
+
+EXPRESS – multi-routes file example
+var express = require(‘express’);
+var app = express();
+
+app.use(express.static(‘public’));
+
+var blocks = require(‘./routes/blocks’);
+var buildings = require(‘./routes/buildings’);
+var users = require(‘./routes/users’);
+
+app.use(‘/blocks’, blocks);
+app.use(‘/buildings’, buildings);
+app.use(‘/users’, users);
+
+app.listen(3000, function(){
+	console.log(“Listening on 3000 \n”);
+});
+
